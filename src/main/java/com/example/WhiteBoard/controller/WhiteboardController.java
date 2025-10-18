@@ -1,5 +1,6 @@
 package com.example.WhiteBoard.controller;
 import com.example.WhiteBoard.model.DrawingCommand;
+import com.example.WhiteBoard.model.DrawingDocument;
 import com.example.WhiteBoard.service.WhiteboardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -19,7 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-
+@CrossOrigin(origins = "*") // or your specific frontend URL
+@RestController
 @Controller
 public class WhiteboardController {
 
@@ -76,6 +80,19 @@ public class WhiteboardController {
         whiteboardService.clearHistory(sessionId);
         logger.info("History cleared. Broadcasting CLEAR command to /topic/whiteboard/{}", sessionId);
         return Collections.singletonMap("type", "CLEAR");
+    }
+
+    // ✅ REST endpoint to fetch existing drawings
+    @GetMapping("/api/whiteboard/{sessionId}")
+    public List<DrawingCommand> getSessionHistory(@PathVariable String sessionId) {
+        System.out.println("Getting history for session ID: " + sessionId);
+        return whiteboardService.getHistory(sessionId);
+    }
+
+    // ✅ Optional: clear session drawings
+    @DeleteMapping("/api/whiteboard/{sessionId}")
+    public void clearSession(@PathVariable String sessionId) {
+        whiteboardService.clearHistory(sessionId);
     }
 }
 
